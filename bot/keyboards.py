@@ -1,6 +1,8 @@
 from aiogram.filters import callback_data
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from db import get_logins
+from kassa import create_payment, check_payment
 
 
 def make_logins_kb(id) -> ReplyKeyboardMarkup: # Достаёт из бд логины стима на которые этот юзер тг делал пополнения 
@@ -9,12 +11,21 @@ def make_logins_kb(id) -> ReplyKeyboardMarkup: # Достаёт из бд лог
 
     for i in range(len(data)):
         logins.append(KeyboardButton(text=data[i]))
-    logins.append(KeyboardButton(text='Отмена'))
+    logins.append(cancel)
 
     return ReplyKeyboardMarkup(keyboard=[logins], 
                                resize_keyboard=True, input_field_placeholder="Введите/Выберите логин Steam...")
 
 
+def ykReplenishment(payment):
+    builder = InlineKeyboardBuilder()
+    builder.button(text="Yookassa 8%", url=payment["confirmation"]["confirmation_url"]) # callback_data не работает вместе с url
+    builder.button(text="Подтвердить платёж", callback_data="confirmation")
+    builder.button(text="Отмена", callback_data="CancelPayment")
+    return builder.adjust(1)
+
+
+cancel = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="Отмена")]])
 
 main = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Пополнение')],
                                     [KeyboardButton(text='Помощь')],
@@ -29,30 +40,6 @@ pomosh = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Не 
                                                [InlineKeyboardButton(text='Другая проблема', callback_data='Другая проблема')]])
                                             # надо убрать нижние кнопки при вызове помощи и добавить сюда инлайн кнопку назад (для возвращения в меню)
 
-
-replenishment = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='300 руб', callback_data='300 руб'),
-                                                       InlineKeyboardButton(text='600 руб', callback_data='600 руб')],
-                                                      [InlineKeyboardButton(text='1200 руб', callback_data='1200 руб'),
-                                                       InlineKeyboardButton(text='2400 руб', callback_data='2400 руб')]])
-
-replenishment300 = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='СБП', callback_data='СБП')],
-                                                         [InlineKeyboardButton(text='Сбер', callback_data='Сбер')],
-                                                         [InlineKeyboardButton(text='Т-Банк', callback_data='Т-Банк')]])
-
-
-replenishment600 = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='СБП', callback_data='СБП')],
-                                                         [InlineKeyboardButton(text='Сбер', callback_data='Сбер')],
-                                                         [InlineKeyboardButton(text='Т-Банк', callback_data='Т-Банк')]])
-
-
-replenishment1200 = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='СБП', callback_data='СБП')],
-                                                         [InlineKeyboardButton(text='Сбер', callback_data='Сбер')],
-                                                         [InlineKeyboardButton(text='Т-Банк', callback_data='Т-Банк')]])
-
-
-
-replenishment2400 = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='СБП', callback_data='СБП')],
-                                                         [InlineKeyboardButton(text='Сбер', callback_data='Сбер')],
-                                                         [InlineKeyboardButton(text='Т-Банк', callback_data='Т-Банк')]])
+contacts = InlineKeyboardMarkup(inline_keyboard=[])
 
 
